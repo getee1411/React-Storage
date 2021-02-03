@@ -133,163 +133,153 @@ class Gallery extends Component {
     }
     
     
-Add = () => {
-    // menampilkan komponen modal
-    $("#modal_buku").modal("show")
-    this.setState({
-        isbn: Math.random(1,10000000),
-        judul: "",
-        penulis: "",
-        penerbit: "",
-        cover: "",
-        harga: 0,
-        action: "insert"
-    })
-}
-
-Edit = (item) => {
-    // menampilkan komponen modal
-    $("#modal_buku").modal("show")
-    this.setState({
-        isbn: item.isbn,
-        judul: item.judul,
-        penulis: item.penulis,
-        penerbit: item.penerbit,
-        cover: item.cover,
-        harga: item.harga,
-        action: "update",
-        selectedItem: item
-    })
-}
-
-Save = (event) => {
-    event.preventDefault();
-    // menampung data state buku
-    let tempBuku = this.state.buku
-
-    if (this.state.action === "insert") {
-        // menambah data baru
-        tempBuku.push({
-            isbn: this.state.isbn,
-            judul: this.state.judul,
-            penulis: this.state.penulis,
-            penerbit: this.state.penerbit,
-            cover: this.state.cover,
-            harga: this.state.harga,
+    Add = () => {
+        window.$("#modal_buku").modal("show")
+        this.setState({
+            isbn: Math.random(1, 10000000),
+            judul: "",
+            penulis: "",
+            penerbit: "",
+            cover: "",
+            harga: 0,
+            action: "insert"
         })
-    }else if(this.state.action === "update"){
-        // menyimpan perubahan data
-        let index = tempBuku.indexOf(this.state.selectedItem)
-        tempBuku[index].isbn = this.state.isbn
-        tempBuku[index].judul = this.state.judul
-        tempBuku[index].penulis = this.state.penulis
-        tempBuku[index].penerbit = this.state.penerbit
-        tempBuku[index].cover = this.state.cover
-        tempBuku[index].harga = this.state.harga
     }
+    // FUNCTION START END
 
-    this.setState({buku : tempBuku})
-    
-    // menutup komponen modal_buku
-    $("#modal_buku").modal("hide")
-}
-
-Drop = (item) => {
-    // beri konfirmasi untuk menghapus data
-    if(window.confirm("Apakah anda yakin ingin menghapus data ini?")){
-        // menghapus data
-        let tempBuku = this.state.buku
-        // posisi index data yg akan dihapus
-        let index = tempBuku.indexOf(item)
-
-        // hapus data
-        tempBuku.splice(index, 1)
-
-        this.setState({buku: tempBuku})
-    }
-}
-
-searching = event => {
-    if(event.keyCode === 13){
-        // 13 adalah kode untuk tombol enter
-
-        let keyword = this.state.keyword.toLowerCase()
-        let tempBuku = this.state.buku
-        let result = tempBuku.filter(item => {
-            return item.judul.toLowerCase().includes(keyword) ||
-            item.penulis.toLowerCase().includes(keyword) || 
-            item.penerbit.toLowerCase().includes(keyword)
+    // FUNCTION EDIT START
+    Edit = (item) => {
+        $("#modal_buku").modal("show")
+        this.setState({
+            isbn: item.isbn,
+            judul: item.judul,
+            penulis: item.penulis,
+            penerbit: item.penerbit,
+            cover: item.cover,
+            harga: item.harga,
+            action: "update",
+            selectedItem: item
         })
-
-        this.setState({filterBuku: result})
     }
-}
+    // FUNCTION EDIT END
 
-setUser = () => {
-    // cek eksistensi dari session storage
-    if(sessionStorage.getItem("user") === null){
-        // kondisi jika session storage "user" belum dibuat
-        let prompt = window.prompt("Masukkan Nama Anda","")
-        if(prompt === null || prompt === ""){
-            // jika user tidak mengisikan namanya
-            this.setUser()
-        }else{
-            // jika user telah mengisikan namanya
+    // FUNCTION SAVE START
+    Save = (event) => {
+        event.preventDefault()
 
-            // simpan nama user ke session storage
-            sessionStorage.setItem("user", prompt)
+        //tampung dulu data state buku yang bentuknya array itu
+        let tempBuku = this.state.buku
 
-            // simpan nama user ke state.user
-            this.setState({user: prompt})
+        if (this.state.action === "insert") {
+            // Ambil data buku yang baru diinput di variable temporary dan push
+            tempBuku.push({
+                isbn: this.state.isbn,
+                judul: this.state.judul,
+                penulis: this.state.penulis,
+                penerbit: this.state.penerbit,
+                cover: this.state.cover,
+                harga: this.state.harga,
+            })
+        } else if (this.state.action === "update") {
+            // menyimpan perubahan data
+            let index = tempBuku.indexOf(this.state.selectedItem)
+            tempBuku[index].isbn = this.state.isbn
+            tempBuku[index].judul = this.state.judul
+            tempBuku[index].penulis = this.state.penulis
+            tempBuku[index].penerbit = this.state.penerbit
+            tempBuku[index].cover = this.state.cover
+            tempBuku[index].harga = this.state.harga
         }
-    }else{
-        // kondisi saat session storage "user" telah dibuat
 
-        // akses nilai dari session storage "user"
-        let name = sessionStorage.getItem("user")
-        this.setState({user: name})
+        this.setState({ buku: tempBuku })
+
+        //menutup komponen modal
+        $("#modal_buku").modal("hide")
     }
-}
+    //FUNCTION SAVE END
 
-componentDidMount(){
-    this.setUser()
-}
-
-addToCart = (selectedItem) => {
-    // membuat sebuah variabel untuk menampung cart sementara
-    let tempCart = []
-
-    // cek eksistensi dari data cart pada localStorage
-    if(localStorage.getItem("cart") !== null){
-        tempCart = JSON.parse(localStorage.getItem("cart"))
-        // JSON.parse() digunakan untuk mengonversi dari string -> array object
-    }
-
-    // cek data yang dipilih user ke keranjang belanja
-    let existItem = tempCart.find(item => item.isbn === selectedItem.isbn)
-
-    if(existItem){
-        // jika item yang dipilih ada pada keranjang belanja
-        window.alert("Anda telah memilih item ini")
-    }else{
-        // user diminta memasukkan jumlah item yang dibeli
-        let promptJumlah = window.prompt("Masukkan jumlah item yang beli","")
-        if(promptJumlah !== null && promptJumlah !== ""){
-            // jika user memasukkan jumlah item yg dibeli
-
-            // menambahkan properti "jumlahBeli" pada item yang dipilih
-            selectedItem.jumlahBeli = promptJumlah
-            
-            // masukkan item yg dipilih ke dalam cart
-            tempCart.push(selectedItem)
-
-            // simpan array tempCart ke localStorage
-            localStorage.setItem("cart", JSON.stringify(tempCart))
+    // FUNCTION DELETE DATA START
+    Drop = (item) => {
+        if (window.confirm("Delete this file?")) {
+            let tempBuku = this.state.buku
+            let index = tempBuku.indexOf(item)
+            tempBuku.splice(index, 1)
+            this.setState({ buku: tempBuku })
         }
     }
-}
+    //FUNCTION DELETE DATA END
 
+    // FUNCTION SEARCH START
+    searching = event => {
+        if (event.keyCode === 13) {
+            // 13 adalah kode tombol enter
 
+            let keyword = this.state.keyword.toLocaleLowerCase()
+            let tempBuku = this.state.buku
+            let result = tempBuku.filter(item => {
+                return item.judul.toLocaleLowerCase().includes(keyword) ||
+                    item.penulis.toLocaleLowerCase().includes(keyword) ||
+                    item.penerbit.toLocaleLowerCase().includes(keyword)
+            })
+            this.setState({ filterBuku: result })
+        }
+    }
+    //FUNCTION SEARCH END
+
+    // FUNCTION SETUSER START
+    setUser = () => {
+        if (sessionStorage.getItem("user") === null) {
+            let prompt = window.prompt("Insert your Name", "")
+            if (prompt === null || prompt === "") {
+                this.setUser()
+            } else {
+                //add the user to session storage
+                sessionStorage.setItem("user", prompt)
+                //add user data to state
+                this.setState({ user: prompt })
+            }
+        } else {
+            //if the user already in the session storage
+            //access the user data in the session storage
+            let name = sessionStorage.getItem("user")
+            this.setState({ user: name })
+        }
+    }
+    // FUNCTION SETUSER END
+
+    // FUNCTION CALL USER SESSION STORAGE START
+    componentDidMount() {
+        this.setUser()
+    }
+    // FUNCTION CALL USER SESSION STORAGE END
+
+    // FUNCTION ADD TO CART START
+    addToCart = (selectedItem) => {
+        // create array for cart temporary data
+        let tempCart = []
+
+        if (localStorage.getItem("cart") !== null) {
+            tempCart = JSON.parse(localStorage.getItem("cart"))
+        }
+
+        // check the data that clicked already on cart or not
+        let existItem = tempCart.find(item => item.isbn === selectedItem.isbn)
+
+        if (existItem) {
+            window.alert("You already add this product on your cart")
+        } else {
+            let promptJumlah = window.prompt("Quantity", "")
+            if (promptJumlah !== null && promptJumlah !== "") {
+                selectedItem.jumlahBeli = promptJumlah
+                //push to tempopary array
+                tempCart.push(selectedItem)
+
+                //add temporary array to local storage
+                localStorage.setItem("cart", JSON.stringify(tempCart))
+            }
+        }
+    }
+    // FUNCTION ADD TO CART END
 }  
 
 export default Gallery;  
