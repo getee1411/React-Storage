@@ -1,157 +1,127 @@
-import React, {Component} from "react";
+import { extend } from 'jquery'
+import React from 'react'
+import CartContainer from './CartContainer'
 
-class Cart extends Component {
-    constructor(){
+class Cart extends React.Component {
+    constructor() {
         super()
         this.state = {
-            cart: [], // untuk menyimpan list cart
-            user: "", // untuk menyimpan data nama user
-            total: 0, // untuk menyimpan data total belanja
-        }    
-    }
-    render(){
-        return(
-            <div className="container">
-                <br />
-                <br />
-                <br />
-                <br />
-                <br />
-                <div className="card col-12 mt-2">
-                    <div className="card-header bg-primary text-white">
-                        <h4>Data Keranjang Belanja</h4>
-                    </div>
-
-                    <div className="card-body">
-                        <h5 className="text-primary">
-                            Nama User: { this.state.user }
-                        </h5>
-
-                        <table className="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Nama Item</th>
-                                    <th>Harga</th>
-                                    <th>Qty</th>
-                                    <th>Total</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                { this.state.cart.map( (item, index) => (
-                                    <tr key={index}>
-                                        <td>{item.judul}</td>
-                                        <td>Rp {item.harga}</td>
-                                        <td>{item.jumlahBeli}</td>
-                                        <td>
-                                            Rp { item.harga * item.jumlahBeli }
-                                        </td>
-                                    </tr>
-                                ) ) }
-                            </tbody>
-                        </table>
-
-                        <h4 className="text-danger">
-                            Total Harga: Rp {this.state.total}
-                        </h4>
-                    </div>
-                </div>
-            </div>
-        );
+            cart: [],
+            user: "",
+            total: 0,
+            selectedItem: null
+        }
     }
 
+    // FUNCTION CART START
     initCart = () => {
-        // memanggil data cart pada localStorage
+
+        //call the data array from local storage
         let tempCart = []
-        if(localStorage.getItem("cart") !== null){
+        if (localStorage.getItem("cart") !== null) {
             tempCart = JSON.parse(localStorage.getItem("cart"))
         }
-        
 
-        // memanggil data user pada localStorage
-        let userName = localStorage.getItem("user")
+        let userName = sessionStorage.getItem("user")
 
-        // kalkulasi total harga
-        let totalHarga = 0;
+        let totalHarga = 0
         tempCart.map(item => {
             totalHarga += (item.harga * item.jumlahBeli)
         })
 
-        // memasukkan data cart, user, dan total harga pada state
         this.setState({
             cart: tempCart,
             user: userName,
             total: totalHarga
         })
     }
+    // FUNCTION CART END
 
-    componentDidMount(){
+    // FUNCTION DIDMOUNT FOR RUN initCart START
+    componentDidMount() {
         this.initCart()
     }
+    // FUNCTION DIDMOUNT FOR RUN initCart END
 
-    Edit = (item) => {
-        // menampilkan komponen modal
-        $("#modal_buku").modal("show")
-        this.setState({
-            isbn: item.isbn,
-            judul: item.judul,
-            penulis: item.penulis,
-            penerbit: item.penerbit,
-            cover: item.cover,
-            harga: item.harga,
-            action: "update",
-            selectedItem: item
-        })
+
+    // FUNCTION ADD START
+    Add = (item) => {
+        let tempCart = this.state.cart
+        let index = tempCart.indexOf(item)
+
+        tempCart[index].jumlahBeli = parseInt(item.jumlahBeli) + 1
+
+        this.setState({ cart: tempCart })
+
+        let stringcart = JSON.stringify(this.state.cart)
+
+        localStorage.setItem("cart", stringcart)
     }
-    
-    Save = (event) => {
-        event.preventDefault();
-        // menampung data state buku
-        let tempBuku = this.state.buku
-    
-        if (this.state.action === "insert") {
-            // menambah data baru
-            tempBuku.push({
-                isbn: this.state.isbn,
-                judul: this.state.judul,
-                penulis: this.state.penulis,
-                penerbit: this.state.penerbit,
-                cover: this.state.cover,
-                harga: this.state.harga,
-            })
-        }else if(this.state.action === "update"){
-            // menyimpan perubahan data
-            let index = tempBuku.indexOf(this.state.selectedItem)
-            tempBuku[index].isbn = this.state.isbn
-            tempBuku[index].judul = this.state.judul
-            tempBuku[index].penulis = this.state.penulis
-            tempBuku[index].penerbit = this.state.penerbit
-            tempBuku[index].cover = this.state.cover
-            tempBuku[index].harga = this.state.harga
+    // FUNCTION ADD START
+
+    // FUNCTION SUBSTRACT START
+    Substract = (item) => {
+        let tempCart = this.state.cart
+        let index = tempCart.indexOf(item)
+
+        if (item.jumlahBeli <= 1) {
+            if (window.confirm("are you sure?")) {
+                tempCart.splice(index, 1)
+                this.setState({ cart: tempCart })
+            } else {
+                this.setState({ cart: tempCart })
+            }
+        } else {
+            tempCart[index].jumlahBeli = parseInt(item.jumlahBeli) - 1
+            this.setState({ cart: tempCart })
         }
-    
-        this.setState({buku : tempBuku})
-        
-        // menutup komponen modal_buku
-        $("#modal_buku").modal("hide")
+
+
+        let stringcart = JSON.stringify(this.state.cart)
+        localStorage.setItem("cart", stringcart)
     }
-    
-    Drop = (item) => {
-        // beri konfirmasi untuk menghapus data
-        if(window.confirm("Apakah anda yakin ingin menghapus data ini?")){
-            // menghapus data
-            let tempBuku = this.state.buku
-            // posisi index data yg akan dihapus
-            let index = tempBuku.indexOf(item)
-    
-            // hapus data
-            tempBuku.splice(index, 1)
-    
-            this.setState({buku: tempBuku})
-        }
+    // FUNCTION SUBSTRACT START
+
+    render() {
+        return (
+            <div className="container">
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                    Your Cart, {this.state.user}
+                <br></br>
+                <div className="container">
+
+                    <div className="container">
+                        {this.state.cart.map((item, index) => (
+                            <CartContainer
+                                cover={item.cover}
+                                judul={item.judul}
+                                harga={item.harga}
+                                jumlah={item.jumlahBeli}
+                                add={() => this.Add(item)}
+                                substract={() => this.Substract(item)}
+                                total={item.harga * item.jumlahBeli}
+                            />
+                        ))}
+                    </div>
+                    <br></br>
+
+                </div>
+
+                <div className="container bill  rounded ">
+                    <div className="row align-items-center mx-auto">
+                        <h3 className="fw-bold text-center">
+                            TOTAL HARGA   Rp {this.state.total}
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        )
     }
 
 }
-
 
 export default Cart;
